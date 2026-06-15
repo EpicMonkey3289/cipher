@@ -1,1 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Caesar Cipher</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+      color: #111;
+    }
+
+    .shift-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 1.5rem;
+    }
+
+    .shift-row label {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .shift-row input[type="range"] {
+      width: 200px;
+    }
+
+    #shift-out {
+      font-size: 14px;
+      font-weight: 600;
+      min-width: 20px;
+    }
+
+    .panels {
+      display: flex;
+      gap: 16px;
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .panel {
+      flex: 1;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 1rem;
+    }
+
+    .panel label {
+      font-size: 12px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .panel textarea {
+      width: 100%;
+      height: 140px;
+      border: none;
+      outline: none;
+      resize: none;
+      font-family: monospace;
+      font-size: 1.1rem;
+      color: #111;
+      background: transparent;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Caesar Cipher</h1>
+
+  <div class="shift-row">
+    <label for="shift">Shift</label>
+    <input type="range" id="shift" min="1" max="25" value="3" step="1"
+      oninput="document.getElementById('shift-out').textContent = this.value; encode();" />
+    <span id="shift-out">3</span>
+  </div>
+
+  <div class="panels">
+    <div class="panel">
+      <label for="input-box">Input</label>
+      <textarea id="input-box" placeholder="Type here..." oninput="encode()"></textarea>
+    </div>
+    <div class="panel">
+      <label>Output</label>
+      <textarea id="output-box" readonly placeholder="Encoded text..."></textarea>
+    </div>
+  </div>
+
+  <script>
+    function encode() {
+      const text = document.getElementById('input-box').value;
+      const shift = parseInt(document.getElementById('shift').value);
+      const result = text.split('').map(char => {
+        if (char >= 'A' && char <= 'Z')
+          return String.fromCharCode(((char.charCodeAt(0) - 65 + shift) % 26) + 65);
+        if (char >= 'a' && char <= 'z')
+          return String.fromCharCode(((char.charCodeAt(0) - 97 + shift) % 26) + 97);
+        return char;
+      }).join('');
+      document.getElementById('output-box').value = result;
+    }
+  </script>
+
+</body>
+</html>
