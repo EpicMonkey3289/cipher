@@ -82,6 +82,32 @@
       width: 100%;
       max-width: 700px;
     }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+      width: 100%;
+      max-width: 700px;
+    }
+
+    button {
+      flex: 1;
+      padding: 10px 16px;
+      border: 2px solid #333;
+      background: #333;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #fff;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: #555;
+      border-color: #555;
+    }
   </style>
 </head>
 <body>
@@ -92,13 +118,17 @@
     <div class="shift-row">
       <label for="shift">Caesar Shift</label>
       <input type="range" id="shift" min="-25" max="25" value="3" step="1"
-        oninput="document.getElementById('shift-out').textContent = this.value; translate();" />
+        oninput="document.getElementById('shift-out').textContent = this.value;" />
       <span id="shift-out">3</span>
+    </div>
+
+    <div class="button-row">
+      <button onclick="translate()">Translate</button>
     </div>
 
     <div class="panel">
       <label for="input">Input (Text or Hex)</label>
-      <textarea id="input" placeholder="Type text or hex here..." oninput="translate()"></textarea>
+      <textarea id="input" placeholder="Type text or hex here..."></textarea>
     </div>
 
     <div class="panel">
@@ -115,6 +145,7 @@
   <script>
     function translate() {
       const input = document.getElementById('input').value;
+      const shift = parseInt(document.getElementById('shift').value);
       let encoded = '';
       let decoded = '';
 
@@ -123,8 +154,6 @@
         document.getElementById('decoded').value = '';
         return;
       }
-
-      const shift = parseInt(document.getElementById('shift').value);
 
       // Step 1: Caesar cipher
       const caesarEncoded = input.split('').map(char => {
@@ -142,22 +171,21 @@
         return char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0');
       }).join(' ');
 
-      // Step 3: Decode - Try to parse input as hex first
+      // Step 3: Decode - check if input is hex
       const trimmed = input.trim();
-      const isHex = /^[0-9A-Fa-f\s]+$/.test(trimmed);
+      const isHex = /^[0-9A-Fa-f\s]+$/.test(trimmed) && trimmed.length > 0;
 
-      if (isHex && trimmed.length > 0) {
-        // Input is hex - decode it
+      if (isHex) {
         try {
-          const hexArray = trimmed.split(/\s+/);
-          decoded = hexArray.map(h => {
+          const hexArray = trimmed.split(/\s+/).filter(h => h.length > 0);
+          const hexToText = hexArray.map(h => {
             const num = parseInt(h, 16);
-            if (isNaN(num)) throw new Error('Invalid hex');
+            if (isNaN(num)) throw new Error('Invalid');
             return String.fromCharCode(num);
           }).join('');
 
-          // Then reverse the Caesar shift
-          decoded = decoded.split('').map(char => {
+          // Reverse Caesar shift
+          decoded = hexToText.split('').map(char => {
             if (char >= 'A' && char <= 'Z') {
               return String.fromCharCode(((char.charCodeAt(0) - 65 - shift) % 26 + 26) % 26 + 65);
             }
@@ -170,7 +198,7 @@
           decoded = 'Invalid hex input';
         }
       } else {
-        // Input is text - reverse the Caesar shift
+        // Input is text - reverse Caesar shift
         decoded = input.split('').map(char => {
           if (char >= 'A' && char <= 'Z') {
             return String.fromCharCode(((char.charCodeAt(0) - 65 - shift) % 26 + 26) % 26 + 65);
