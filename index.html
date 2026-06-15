@@ -25,16 +25,6 @@
       color: #111;
     }
 
-    h2 {
-      font-size: 1.1rem;
-      font-weight: 500;
-      margin-top: 2rem;
-      margin-bottom: 1rem;
-      color: #333;
-      width: 100%;
-      max-width: 700px;
-    }
-
     .shift-row {
       display: flex;
       align-items: center;
@@ -57,19 +47,14 @@
       min-width: 30px;
     }
 
-    .panels {
-      display: flex;
-      gap: 16px;
-      width: 100%;
-      max-width: 700px;
-    }
-
     .panel {
-      flex: 1;
       background: #fff;
       border: 1px solid #ddd;
       border-radius: 10px;
       padding: 1rem;
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 1.5rem;
     }
 
     .panel label {
@@ -97,41 +82,6 @@
       width: 100%;
       max-width: 700px;
     }
-
-    .mode-selector {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 1.5rem;
-      width: 100%;
-      max-width: 700px;
-    }
-
-    .mode-selector button {
-      flex: 1;
-      padding: 10px 16px;
-      border: 2px solid #ddd;
-      background: #fff;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      color: #555;
-      transition: all 0.2s;
-    }
-
-    .mode-selector button.active {
-      background: #333;
-      color: #fff;
-      border-color: #333;
-    }
-
-    .mode-selector button:hover {
-      border-color: #333;
-    }
-
-    .hidden {
-      display: none;
-    }
   </style>
 </head>
 <body>
@@ -139,88 +89,45 @@
   <div class="container">
     <h1>Caesar Cipher & ASCII Hex Converter</h1>
 
-    <div class="mode-selector">
-      <button class="active" onclick="switchMode('caesar')">Caesar Cipher</button>
-      <button onclick="switchMode('hex')">Hex Converter</button>
+    <div class="shift-row">
+      <label for="shift">Caesar Shift</label>
+      <input type="range" id="shift" min="-25" max="25" value="3" step="1"
+        oninput="document.getElementById('shift-out').textContent = this.value; translate();" />
+      <span id="shift-out">3</span>
     </div>
 
-    <!-- Caesar Cipher Mode -->
-    <div id="caesar-mode">
-      <h2>Caesar Cipher</h2>
-      <div class="shift-row">
-        <label for="shift">Shift</label>
-        <input type="range" id="shift" min="-25" max="25" value="3" step="1"
-          oninput="document.getElementById('shift-out').textContent = this.value; translate();" />
-        <span id="shift-out">3</span>
-      </div>
-
-      <div class="panels">
-        <div class="panel">
-          <label for="input-box">Input</label>
-          <textarea id="input-box" placeholder="Type here..." oninput="translate()"></textarea>
-        </div>
-        <div class="panel">
-          <label>Output</label>
-          <textarea id="output-box" readonly placeholder="Encoded text..."></textarea>
-        </div>
-      </div>
+    <div class="panel">
+      <label for="input">Input (Text or Hex)</label>
+      <textarea id="input" placeholder="Type text or hex here..." oninput="translate()"></textarea>
     </div>
 
-    <!-- Hex Converter Mode -->
-    <div id="hex-mode" class="hidden">
-      <h2>Text to Hex</h2>
-      <div class="panels">
-        <div class="panel">
-          <label for="text-input">Text Input</label>
-          <textarea id="text-input" placeholder="Type text here..." oninput="translate()"></textarea>
-        </div>
-        <div class="panel">
-          <label for="hex-output">Hex Output</label>
-          <textarea id="hex-output" readonly placeholder="Hex will appear here..."></textarea>
-        </div>
-      </div>
+    <div class="panel">
+      <label>Encoded (Caesar + Hex)</label>
+      <textarea id="encoded" readonly placeholder="Encoded output..."></textarea>
+    </div>
 
-      <h2>Hex to Text</h2>
-      <div class="panels">
-        <div class="panel">
-          <label for="hex-input">Hex Input</label>
-          <textarea id="hex-input" placeholder="Enter hex (e.g., 48656C6C6F)..." oninput="translate()"></textarea>
-        </div>
-        <div class="panel">
-          <label for="text-output">Text Output</label>
-          <textarea id="text-output" readonly placeholder="Decoded text..."></textarea>
-        </div>
-      </div>
+    <div class="panel">
+      <label>Decoded (Back to English)</label>
+      <textarea id="decoded" readonly placeholder="Decoded output..."></textarea>
     </div>
   </div>
 
   <script>
-    let currentMode = 'caesar';
-
-    // Switch between modes
-    function switchMode(mode) {
-      currentMode = mode;
-      document.getElementById('caesar-mode').classList.toggle('hidden', mode !== 'caesar');
-      document.getElementById('hex-mode').classList.toggle('hidden', mode !== 'hex');
-      document.querySelectorAll('.mode-selector button').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
-      translate();
-    }
-
-    // Unified translate function
     function translate() {
-      if (currentMode === 'caesar') {
-        translateCaesar();
-      } else if (currentMode === 'hex') {
-        translateHex();
-      }
-    }
+      const input = document.getElementById('input').value;
+      let encoded = '';
+      let decoded = '';
 
-    // Caesar Cipher encoding
-    function translateCaesar() {
-      const text = document.getElementById('input-box').value;
+      if (!input) {
+        document.getElementById('encoded').value = '';
+        document.getElementById('decoded').value = '';
+        return;
+      }
+
       const shift = parseInt(document.getElementById('shift').value);
-      const result = text.split('').map(char => {
+
+      // Step 1: Caesar cipher
+      const caesarEncoded = input.split('').map(char => {
         if (char >= 'A' && char <= 'Z') {
           return String.fromCharCode(((char.charCodeAt(0) - 65 + shift) % 26 + 26) % 26 + 65);
         }
@@ -229,40 +136,54 @@
         }
         return char;
       }).join('');
-      document.getElementById('output-box').value = result;
-    }
 
-    // Hex conversion
-    function translateHex() {
-      const textInput = document.getElementById('text-input').value;
-      const hexInput = document.getElementById('hex-input').value;
+      // Step 2: Convert to hex
+      encoded = caesarEncoded.split('').map(char => {
+        return char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0');
+      }).join(' ');
 
-      // Text to Hex
-      if (textInput) {
-        const hex = textInput.split('').map(char => {
-          return char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0');
-        }).join(' ');
-        document.getElementById('hex-output').value = hex;
-      } else {
-        document.getElementById('hex-output').value = '';
-      }
+      // Step 3: Decode - Try to parse input as hex first
+      const trimmed = input.trim();
+      const isHex = /^[0-9A-Fa-f\s]+$/.test(trimmed);
 
-      // Hex to Text
-      if (hexInput) {
+      if (isHex && trimmed.length > 0) {
+        // Input is hex - decode it
         try {
-          const hex = hexInput.trim().split(/\s+/);
-          const text = hex.map(h => {
+          const hexArray = trimmed.split(/\s+/);
+          decoded = hexArray.map(h => {
             const num = parseInt(h, 16);
             if (isNaN(num)) throw new Error('Invalid hex');
             return String.fromCharCode(num);
           }).join('');
-          document.getElementById('text-output').value = text;
+
+          // Then reverse the Caesar shift
+          decoded = decoded.split('').map(char => {
+            if (char >= 'A' && char <= 'Z') {
+              return String.fromCharCode(((char.charCodeAt(0) - 65 - shift) % 26 + 26) % 26 + 65);
+            }
+            if (char >= 'a' && char <= 'z') {
+              return String.fromCharCode(((char.charCodeAt(0) - 97 - shift) % 26 + 26) % 26 + 97);
+            }
+            return char;
+          }).join('');
         } catch (e) {
-          document.getElementById('text-output').value = 'Invalid hex input';
+          decoded = 'Invalid hex input';
         }
       } else {
-        document.getElementById('text-output').value = '';
+        // Input is text - reverse the Caesar shift
+        decoded = input.split('').map(char => {
+          if (char >= 'A' && char <= 'Z') {
+            return String.fromCharCode(((char.charCodeAt(0) - 65 - shift) % 26 + 26) % 26 + 65);
+          }
+          if (char >= 'a' && char <= 'z') {
+            return String.fromCharCode(((char.charCodeAt(0) - 97 - shift) % 26 + 26) % 26 + 97);
+          }
+          return char;
+        }).join('');
       }
+
+      document.getElementById('encoded').value = encoded;
+      document.getElementById('decoded').value = decoded;
     }
   </script>
 
