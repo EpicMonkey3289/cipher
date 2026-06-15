@@ -97,6 +97,41 @@
       width: 100%;
       max-width: 700px;
     }
+
+    .mode-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .mode-selector button {
+      flex: 1;
+      padding: 10px 16px;
+      border: 2px solid #ddd;
+      background: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #555;
+      transition: all 0.2s;
+    }
+
+    .mode-selector button.active {
+      background: #333;
+      color: #fff;
+      border-color: #333;
+    }
+
+    .mode-selector button:hover {
+      border-color: #333;
+    }
+
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -104,52 +139,85 @@
   <div class="container">
     <h1>Caesar Cipher & ASCII Hex Converter</h1>
 
-    <h2>Caesar Cipher</h2>
-    <div class="shift-row">
-      <label for="shift">Shift</label>
-      <input type="range" id="shift" min="-25" max="25" value="3" step="1"
-        oninput="document.getElementById('shift-out').textContent = this.value; encode();" />
-      <span id="shift-out">3</span>
+    <div class="mode-selector">
+      <button class="active" onclick="switchMode('caesar')">Caesar Cipher</button>
+      <button onclick="switchMode('hex')">Hex Converter</button>
     </div>
 
-    <div class="panels">
-      <div class="panel">
-        <label for="input-box">Input</label>
-        <textarea id="input-box" placeholder="Type here..." oninput="encode()"></textarea>
+    <!-- Caesar Cipher Mode -->
+    <div id="caesar-mode">
+      <h2>Caesar Cipher</h2>
+      <div class="shift-row">
+        <label for="shift">Shift</label>
+        <input type="range" id="shift" min="-25" max="25" value="3" step="1"
+          oninput="document.getElementById('shift-out').textContent = this.value; translate();" />
+        <span id="shift-out">3</span>
       </div>
-      <div class="panel">
-        <label>Output</label>
-        <textarea id="output-box" readonly placeholder="Encoded text..."></textarea>
-      </div>
-    </div>
 
-    <h2>ASCII Hex Converter</h2>
-    <div class="panels">
-      <div class="panel">
-        <label for="text-input">Text to Hex</label>
-        <textarea id="text-input" placeholder="Type text here..." oninput="textToHex()"></textarea>
-      </div>
-      <div class="panel">
-        <label for="hex-output">Hex Output</label>
-        <textarea id="hex-output" readonly placeholder="Hex will appear here..."></textarea>
+      <div class="panels">
+        <div class="panel">
+          <label for="input-box">Input</label>
+          <textarea id="input-box" placeholder="Type here..." oninput="translate()"></textarea>
+        </div>
+        <div class="panel">
+          <label>Output</label>
+          <textarea id="output-box" readonly placeholder="Encoded text..."></textarea>
+        </div>
       </div>
     </div>
 
-    <div class="panels">
-      <div class="panel">
-        <label for="hex-input">Hex to Text</label>
-        <textarea id="hex-input" placeholder="Enter hex (e.g., 48656C6C6F)..." oninput="hexToText()"></textarea>
+    <!-- Hex Converter Mode -->
+    <div id="hex-mode" class="hidden">
+      <h2>Text to Hex</h2>
+      <div class="panels">
+        <div class="panel">
+          <label for="text-input">Text Input</label>
+          <textarea id="text-input" placeholder="Type text here..." oninput="translate()"></textarea>
+        </div>
+        <div class="panel">
+          <label for="hex-output">Hex Output</label>
+          <textarea id="hex-output" readonly placeholder="Hex will appear here..."></textarea>
+        </div>
       </div>
-      <div class="panel">
-        <label for="text-output">Text Output</label>
-        <textarea id="text-output" readonly placeholder="Decoded text..."></textarea>
+
+      <h2>Hex to Text</h2>
+      <div class="panels">
+        <div class="panel">
+          <label for="hex-input">Hex Input</label>
+          <textarea id="hex-input" placeholder="Enter hex (e.g., 48656C6C6F)..." oninput="translate()"></textarea>
+        </div>
+        <div class="panel">
+          <label for="text-output">Text Output</label>
+          <textarea id="text-output" readonly placeholder="Decoded text..."></textarea>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    // Caesar Cipher
-    function encode() {
+    let currentMode = 'caesar';
+
+    // Switch between modes
+    function switchMode(mode) {
+      currentMode = mode;
+      document.getElementById('caesar-mode').classList.toggle('hidden', mode !== 'caesar');
+      document.getElementById('hex-mode').classList.toggle('hidden', mode !== 'hex');
+      document.querySelectorAll('.mode-selector button').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      translate();
+    }
+
+    // Unified translate function
+    function translate() {
+      if (currentMode === 'caesar') {
+        translateCaesar();
+      } else if (currentMode === 'hex') {
+        translateHex();
+      }
+    }
+
+    // Caesar Cipher encoding
+    function translateCaesar() {
       const text = document.getElementById('input-box').value;
       const shift = parseInt(document.getElementById('shift').value);
       const result = text.split('').map(char => {
@@ -164,28 +232,36 @@
       document.getElementById('output-box').value = result;
     }
 
-    // Text to ASCII Hex
-    function textToHex() {
-      const text = document.getElementById('text-input').value;
-      const hex = text.split('').map(char => {
-        return char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0');
-      }).join(' ');
-      document.getElementById('hex-output').value = hex;
-    }
-
-    // ASCII Hex to Text
-    function hexToText() {
+    // Hex conversion
+    function translateHex() {
+      const textInput = document.getElementById('text-input').value;
       const hexInput = document.getElementById('hex-input').value;
-      try {
-        const hex = hexInput.trim().split(/\s+/);
-        const text = hex.map(h => {
-          const num = parseInt(h, 16);
-          if (isNaN(num)) throw new Error('Invalid hex');
-          return String.fromCharCode(num);
-        }).join('');
-        document.getElementById('text-output').value = text;
-      } catch (e) {
-        document.getElementById('text-output').value = 'Invalid hex input';
+
+      // Text to Hex
+      if (textInput) {
+        const hex = textInput.split('').map(char => {
+          return char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0');
+        }).join(' ');
+        document.getElementById('hex-output').value = hex;
+      } else {
+        document.getElementById('hex-output').value = '';
+      }
+
+      // Hex to Text
+      if (hexInput) {
+        try {
+          const hex = hexInput.trim().split(/\s+/);
+          const text = hex.map(h => {
+            const num = parseInt(h, 16);
+            if (isNaN(num)) throw new Error('Invalid hex');
+            return String.fromCharCode(num);
+          }).join('');
+          document.getElementById('text-output').value = text;
+        } catch (e) {
+          document.getElementById('text-output').value = 'Invalid hex input';
+        }
+      } else {
+        document.getElementById('text-output').value = '';
       }
     }
   </script>
