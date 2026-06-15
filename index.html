@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Caesar Cipher</title>
+  <title>Caesar Cipher & ASCII Hex Converter</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -23,6 +23,16 @@
       font-weight: 500;
       margin-bottom: 1.5rem;
       color: #111;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      color: #333;
+      width: 100%;
+      max-width: 700px;
     }
 
     .shift-row {
@@ -82,31 +92,63 @@
       color: #111;
       background: transparent;
     }
+
+    .container {
+      width: 100%;
+      max-width: 700px;
+    }
   </style>
 </head>
 <body>
 
-  <h1>Caesar Cipher</h1>
+  <div class="container">
+    <h1>Caesar Cipher & ASCII Hex Converter</h1>
 
-  <div class="shift-row">
-    <label for="shift">Shift</label>
-    <input type="range" id="shift" min="1" max="25" value="3" step="1"
-      oninput="document.getElementById('shift-out').textContent = this.value; encode();" />
-    <span id="shift-out">3</span>
-  </div>
-
-  <div class="panels">
-    <div class="panel">
-      <label for="input-box">Input</label>
-      <textarea id="input-box" placeholder="Type here..." oninput="encode()"></textarea>
+    <h2>Caesar Cipher</h2>
+    <div class="shift-row">
+      <label for="shift">Shift</label>
+      <input type="range" id="shift" min="1" max="25" value="3" step="1"
+        oninput="document.getElementById('shift-out').textContent = this.value; encode();" />
+      <span id="shift-out">3</span>
     </div>
-    <div class="panel">
-      <label>Output</label>
-      <textarea id="output-box" readonly placeholder="Encoded text..."></textarea>
+
+    <div class="panels">
+      <div class="panel">
+        <label for="input-box">Input</label>
+        <textarea id="input-box" placeholder="Type here..." oninput="encode()"></textarea>
+      </div>
+      <div class="panel">
+        <label>Output</label>
+        <textarea id="output-box" readonly placeholder="Encoded text..."></textarea>
+      </div>
+    </div>
+
+    <h2>ASCII Hex Converter</h2>
+    <div class="panels">
+      <div class="panel">
+        <label for="text-input">Text to Hex</label>
+        <textarea id="text-input" placeholder="Type text here..." oninput="textToHex()"></textarea>
+      </div>
+      <div class="panel">
+        <label for="hex-output">Hex Output</label>
+        <textarea id="hex-output" readonly placeholder="Hex will appear here..."></textarea>
+      </div>
+    </div>
+
+    <div class="panels">
+      <div class="panel">
+        <label for="hex-input">Hex to Text</label>
+        <textarea id="hex-input" placeholder="Enter hex (e.g., 48656C6C6F)..." oninput="hexToText()"></textarea>
+      </div>
+      <div class="panel">
+        <label for="text-output">Text Output</label>
+        <textarea id="text-output" readonly placeholder="Decoded text..."></textarea>
+      </div>
     </div>
   </div>
 
   <script>
+    // Caesar Cipher
     function encode() {
       const text = document.getElementById('input-box').value;
       const shift = parseInt(document.getElementById('shift').value);
@@ -118,6 +160,31 @@
         return char;
       }).join('');
       document.getElementById('output-box').value = result;
+    }
+
+    // Text to ASCII Hex
+    function textToHex() {
+      const text = document.getElementById('text-input').value;
+      const hex = text.split('').map(char => {
+        return char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0');
+      }).join(' ');
+      document.getElementById('hex-output').value = hex;
+    }
+
+    // ASCII Hex to Text
+    function hexToText() {
+      const hexInput = document.getElementById('hex-input').value;
+      try {
+        const hex = hexInput.trim().split(/\s+/);
+        const text = hex.map(h => {
+          const num = parseInt(h, 16);
+          if (isNaN(num)) throw new Error('Invalid hex');
+          return String.fromCharCode(num);
+        }).join('');
+        document.getElementById('text-output').value = text;
+      } catch (e) {
+        document.getElementById('text-output').value = 'Invalid hex input';
+      }
     }
   </script>
 
