@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Caesar Cipher & ASCII Hex Converter</title>
+  <title>Budget AntiSpy Website</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -113,10 +113,10 @@
 <body>
 
   <div class="container">
-    <h1>Caesar Cipher & ASCII Hex Converter</h1>
+    <h1>Budget AntiSpy Website</h1>
 
     <div class="shift-row">
-      <label for="shift">Caesar Shift</label>
+      <label for="shift">Shift</label>
       <input type="range" id="shift" min="-25" max="25" value="3" step="1"
         oninput="document.getElementById('shift-out').textContent = this.value;" />
       <span id="shift-out">3</span>
@@ -133,13 +133,13 @@
     </div>
 
     <div class="panel">
-      <label for="encoded">Encoded (Caesar + Hex)</label>
-      <textarea id="encoded" readonly placeholder="Encoded output will appear here..."></textarea>
+      <label for="encoded">Encoded</label>
+      <textarea id="encoded" readonly placeholder="Encoded Super Secure Text will appear here..."></textarea>
     </div>
 
     <div class="panel">
-      <label for="hexinput">Hex Input (to decode)</label>
-      <textarea id="hexinput" placeholder="Paste hex here to decode back to plaintext..."></textarea>
+      <label for="hexinput">Input (to decode)</label>
+      <textarea id="hexinput" placeholder="Paste Super Secure Text here to decode back to plaintext..."></textarea>
     </div>
 
     <div class="panel">
@@ -158,7 +158,7 @@
         return;
       }
 
-      // Step 1: Apply Caesar cipher
+      // Step 1: Apply cipher
       const caesarEncoded = plaintext.split('').map(char => {
         if (char >= 'A' && char <= 'Z') {
           return String.fromCharCode(((char.charCodeAt(0) - 65 + shift) % 26 + 26) % 26 + 65);
@@ -169,7 +169,7 @@
         return char;
       }).join('');
 
-      // Step 2: Convert to hex
+      // Step 2: Convert to Super Secure Text (SST)
       const encoded = caesarEncoded.split('').map(char => {
         return char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0');
       }).join(' ');
