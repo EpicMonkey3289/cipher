@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Combined Cipher Translator</title>
+  <title>Cipher Translator</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -30,36 +30,9 @@
       max-width: 800px;
     }
 
-    /* Cipher Selection */
-    .cipher-selector {
-      margin-bottom: 1.5rem;
-      padding: 1rem;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      width: 100%;
-    }
-
-    .cipher-selector label {
-      font-size: 12px;
-      color: #888;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      display: block;
-      margin-bottom: 8px;
-    }
-
-    .cipher-selector select {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 14px;
-    }
-
-    /* Caesar Cipher Controls */
-    .shift-row {
-      display: none;
+    /* Mode toggle */
+    .mode-row {
+      display: flex;
       align-items: center;
       gap: 12px;
       margin-bottom: 1.5rem;
@@ -67,10 +40,56 @@
       background: #fff;
       border: 1px solid #ddd;
       border-radius: 10px;
+      flex-wrap: wrap;
     }
 
-    .shift-row.active {
+    .mode-row label {
+      font-size: 14px;
+      color: #555;
+      white-space: nowrap;
+    }
+
+    .toggle-group {
       display: flex;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .toggle-group button {
+      flex: 1;
+      padding: 6px 14px;
+      border: none;
+      background: #f0f0f0;
+      color: #555;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+
+    .toggle-group button.active {
+      background: #333;
+      color: #fff;
+    }
+
+    .mode-description {
+      font-size: 12px;
+      color: #888;
+      margin-left: auto;
+    }
+
+    /* Shift Control */
+    .shift-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
     }
 
     .shift-row label {
@@ -88,22 +107,21 @@
       min-width: 30px;
     }
 
-    /* Monoalphabetic Key Controls */
-    .monoalphabetic-key {
+    /* Monoalphabetic Key Control */
+    .mono-row {
       display: none;
       margin-bottom: 1.5rem;
       padding: 1rem;
       background: #fff;
       border: 1px solid #ddd;
       border-radius: 10px;
-      width: 100%;
     }
 
-    .monoalphabetic-key.active {
+    .mono-row.visible {
       display: block;
     }
 
-    .monoalphabetic-key label {
+    .mono-row > label {
       font-size: 12px;
       color: #888;
       text-transform: uppercase;
@@ -112,9 +130,9 @@
       margin-bottom: 8px;
     }
 
-    .monoalphabetic-key textarea {
+    .mono-row textarea {
       width: 100%;
-      height: 60px;
+      height: 56px;
       border: none;
       outline: none;
       resize: none;
@@ -134,7 +152,7 @@
 
     .key-buttons button {
       flex: 1;
-      padding: 8px 12px;
+      padding: 7px 12px;
       border: 1px solid #999;
       background: #f0f0f0;
       border-radius: 6px;
@@ -195,7 +213,6 @@
       display: flex;
       gap: 10px;
       margin-bottom: 1.5rem;
-      width: 100%;
     }
 
     button.action-btn {
@@ -215,66 +232,36 @@
       background: #555;
       border-color: #555;
     }
-
-    .swap-btn {
-      padding: 8px 12px;
-      border: 2px solid #666;
-      background: #f0f0f0;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 500;
-      color: #333;
-      transition: all 0.2s;
-    }
-
-    .swap-btn:hover {
-      background: #e0e0e0;
-    }
-
-    .button-row-with-swap {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .button-row-with-swap .action-btn {
-      flex: 1;
-    }
-
-    .button-row-with-swap .swap-btn {
-      flex: 0;
-    }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h1>Combined Cipher Translator</h1>
+    <h1>Cipher Translator</h1>
 
-    <!-- Cipher Type Selection -->
-    <div class="cipher-selector">
-      <label for="cipher-type">Select Cipher</label>
-      <select id="cipher-type" onchange="switchCipher()">
-        <option value="caesar">Caesar Cipher</option>
-        <option value="monoalphabetic">Monoalphabetic Cipher</option>
-        <option value="hex">Hex Encoding</option>
-      </select>
+    <!-- Mode Toggle -->
+    <div class="mode-row">
+      <label>Mode</label>
+      <div class="toggle-group">
+        <button id="btn-caesar-hex" class="active" onclick="setMode('caesar-hex')">Caesar + Hex</button>
+        <button id="btn-hex" onclick="setMode('hex')">Hex Only</button>
+        <button id="btn-mono-all" onclick="setMode('mono-all')">Mono + Caesar + Hex</button>
+      </div>
+      <span class="mode-description" id="mode-desc">Shifts letters, then encodes as hex</span>
     </div>
 
     <!-- Caesar Shift Control -->
-    <div id="caesar-controls" class="shift-row active">
-      <label for="shift">Shift</label>
+    <div id="caesar-controls" class="shift-row">
+      <label for="shift">Caesar Shift</label>
       <input type="range" id="shift" min="-25" max="25" value="3" step="1"
         oninput="document.getElementById('shift-out').textContent = this.value;" />
       <span id="shift-out">3</span>
     </div>
 
     <!-- Monoalphabetic Key Control -->
-    <div id="monoalphabetic-controls" class="monoalphabetic-key">
-      <label for="mono-key">Substitution Key (A-Z)</label>
-      <textarea id="mono-key" placeholder="Enter 26 unique letters (A-Z). Default: BCDEFGHIJKLMNOPQRSTUVWXYZAA"></textarea>
+    <div id="mono-controls" class="mono-row">
+      <label>Substitution Key (26 unique letters, A–Z)</label>
+      <textarea id="mono-key" placeholder="Enter 26 unique letters A–Z, e.g. QWERTYUIOPASDFGHJKLZXCVBNM"></textarea>
       <div class="key-buttons">
         <button onclick="generateRandomMonoKey()">Generate Random Key</button>
         <button onclick="resetMonoKey()">Reset to Default</button>
@@ -294,181 +281,146 @@
     </div>
 
     <!-- Action Buttons -->
-    <div class="button-row-with-swap">
+    <div class="button-row">
       <button class="action-btn" onclick="performEncode()">Encode</button>
       <button class="action-btn" onclick="performDecode()">Decode</button>
-      <button class="swap-btn" onclick="swapInputOutput()">⇅ Swap</button>
     </div>
   </div>
 
   <script>
-    const DEFAULT_MONO_KEY = 'BCDEFGHIJKLMNOPQRSTUVWXYZAA';
+    let currentMode = 'caesar-hex';
 
-    function switchCipher() {
-      const cipherType = document.getElementById('cipher-type').value;
-      
-      // Toggle Caesar controls
-      const caesarControls = document.getElementById('caesar-controls');
-      caesarControls.classList.toggle('active', cipherType === 'caesar');
+    const DEFAULT_MONO_KEY = 'QWERTYUIOPASDFGHJKLZXCVBNM';
 
-      // Toggle Monoalphabetic controls
-      const monoControls = document.getElementById('monoalphabetic-controls');
-      monoControls.classList.toggle('active', cipherType === 'monoalphabetic');
+    const DESCRIPTIONS = {
+      'caesar-hex':  'Shifts letters by Caesar amount, then encodes as hex',
+      'hex':         'Encodes text directly to hex with no shift',
+      'mono-all':    'Applies monoalphabetic substitution → Caesar shift → hex encoding'
+    };
 
-      // Clear output when switching
+    function setMode(mode) {
+      currentMode = mode;
+
+      document.getElementById('btn-caesar-hex').classList.toggle('active', mode === 'caesar-hex');
+      document.getElementById('btn-hex').classList.toggle('active', mode === 'hex');
+      document.getElementById('btn-mono-all').classList.toggle('active', mode === 'mono-all');
+
+      // Caesar shift visible for caesar-hex and mono-all
+      document.getElementById('caesar-controls').style.display =
+        (mode === 'caesar-hex' || mode === 'mono-all') ? 'flex' : 'none';
+
+      // Mono key visible only for mono-all
+      document.getElementById('mono-controls').classList.toggle('visible', mode === 'mono-all');
+
+      document.getElementById('mode-desc').textContent = DESCRIPTIONS[mode];
       document.getElementById('output-text').value = '';
     }
 
-    function swapInputOutput() {
-      const input = document.getElementById('input-text');
-      const output = document.getElementById('output-text');
-      const temp = input.value;
-      input.value = output.value;
-      output.value = temp;
-    }
-
-    // ===== CAESAR CIPHER =====
-    function encodeCaesar() {
-      const plaintext = document.getElementById('input-text').value;
-      const shift = parseInt(document.getElementById('shift').value);
-
-      if (!plaintext) {
-        document.getElementById('output-text').value = '';
-        return;
-      }
-
-      const caesarEncoded = plaintext.split('').map(char => {
-        if (char >= 'A' && char <= 'Z') {
-          return String.fromCharCode(((char.charCodeAt(0) - 65 + shift) % 26 + 26) % 26 + 65);
-        }
-        if (char >= 'a' && char <= 'z') {
-          return String.fromCharCode(((char.charCodeAt(0) - 97 + shift) % 26 + 26) % 26 + 97);
-        }
-        return char;
-      }).join('');
-
-      const encoded = caesarEncoded.split('').map(char => {
-        return char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0');
-      }).join(' ');
-
-      document.getElementById('output-text').value = encoded;
-    }
-
-    function decodeCaesar() {
-      const hexinput = document.getElementById('input-text').value.trim();
-      const shift = parseInt(document.getElementById('shift').value);
-
-      if (!hexinput) {
-        document.getElementById('output-text').value = '';
-        return;
-      }
-
-      try {
-        const hexArray = hexinput.split(/\s+/).filter(h => h.length > 0);
-        const hexToText = hexArray.map(h => {
-          const num = parseInt(h, 16);
-          if (isNaN(num)) throw new Error('Invalid hex');
-          return String.fromCharCode(num);
-        }).join('');
-
-        const decoded = hexToText.split('').map(char => {
-          if (char >= 'A' && char <= 'Z') {
-            return String.fromCharCode(((char.charCodeAt(0) - 65 - shift) % 26 + 26) % 26 + 65);
-          }
-          if (char >= 'a' && char <= 'z') {
-            return String.fromCharCode(((char.charCodeAt(0) - 97 - shift) % 26 + 26) % 26 + 97);
-          }
-          return char;
-        }).join('');
-
-        document.getElementById('output-text').value = decoded;
-      } catch (e) {
-        document.getElementById('output-text').value = 'Error: ' + e.message;
-      }
-    }
-
-    // ===== MONOALPHABETIC CIPHER =====
+    // ===== MONOALPHABETIC HELPERS =====
     function generateRandomMonoKey() {
-      const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-      for (let i = alphabet.length - 1; i > 0; i--) {
+      const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+      for (let i = alpha.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [alphabet[i], alphabet[j]] = [alphabet[j], alphabet[i]];
+        [alpha[i], alpha[j]] = [alpha[j], alpha[i]];
       }
-      document.getElementById('mono-key').value = alphabet.join('');
+      document.getElementById('mono-key').value = alpha.join('');
     }
 
     function resetMonoKey() {
       document.getElementById('mono-key').value = DEFAULT_MONO_KEY;
     }
 
-    function getMonoalphabeticKey() {
+    function getMonoKey() {
       let key = document.getElementById('mono-key').value.toUpperCase().trim();
       if (!key) {
         key = DEFAULT_MONO_KEY;
         document.getElementById('mono-key').value = key;
       }
-      if (key.length !== 26) {
-        throw new Error('Key must be exactly 26 characters');
-      }
-      const uniqueChars = new Set(key);
-      if (uniqueChars.size !== 26) {
-        throw new Error('Key must contain 26 unique letters');
-      }
+      if (key.length !== 26) throw new Error('Substitution key must be exactly 26 characters');
+      if (new Set(key).size !== 26) throw new Error('Substitution key must contain 26 unique letters');
       return key;
     }
 
-    function encodeMonoalphabetic() {
+    // ===== CAESAR HELPERS =====
+    function caesarShift(text, shift) {
+      return text.split('').map(char => {
+        if (char >= 'A' && char <= 'Z')
+          return String.fromCharCode(((char.charCodeAt(0) - 65 + shift) % 26 + 26) % 26 + 65);
+        if (char >= 'a' && char <= 'z')
+          return String.fromCharCode(((char.charCodeAt(0) - 97 + shift) % 26 + 26) % 26 + 97);
+        return char;
+      }).join('');
+    }
+
+    // ===== HEX HELPERS =====
+    function toHex(text) {
+      return text.split('').map(c =>
+        c.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0')
+      ).join(' ');
+    }
+
+    function fromHex(hexStr) {
+      const parts = hexStr.trim().split(/\s+/).filter(h => h.length > 0);
+      return parts.map(h => {
+        const num = parseInt(h, 16);
+        if (isNaN(num)) throw new Error('Invalid hex value: ' + h);
+        return String.fromCharCode(num);
+      }).join('');
+    }
+
+    // ===== MONO + CAESAR + HEX =====
+    function encodeMonoAll() {
       const plaintext = document.getElementById('input-text').value;
-      if (!plaintext) {
-        document.getElementById('output-text').value = '';
-        return;
-      }
+      if (!plaintext) { document.getElementById('output-text').value = ''; return; }
 
       try {
-        const key = getMonoalphabeticKey();
+        const key = getMonoKey();
         const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        
-        const encoded = plaintext.split('').map(char => {
+        const shift = parseInt(document.getElementById('shift').value);
+
+        // Step 1: Monoalphabetic substitution
+        const monoSubbed = plaintext.split('').map(char => {
           const upper = char.toUpperCase();
           if (upper >= 'A' && upper <= 'Z') {
-            const index = alphabet.indexOf(upper);
-            return key[index];
+            const substituted = key[alphabet.indexOf(upper)];
+            return char === upper ? substituted : substituted.toLowerCase();
           }
           return char;
         }).join('');
 
-        const hexEncoded = encoded.split('').map(char => {
-          return char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0');
-        }).join(' ');
+        // Step 2: Caesar shift
+        const shifted = caesarShift(monoSubbed, shift);
 
-        document.getElementById('output-text').value = hexEncoded;
+        // Step 3: Hex encode
+        document.getElementById('output-text').value = toHex(shifted);
       } catch (e) {
         document.getElementById('output-text').value = 'Error: ' + e.message;
       }
     }
 
-    function decodeMonoalphabetic() {
-      const hexinput = document.getElementById('input-text').value.trim();
-      if (!hexinput) {
-        document.getElementById('output-text').value = '';
-        return;
-      }
+    function decodeMonoAll() {
+      const hexInput = document.getElementById('input-text').value.trim();
+      if (!hexInput) { document.getElementById('output-text').value = ''; return; }
 
       try {
-        const key = getMonoalphabeticKey();
+        const key = getMonoKey();
         const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const shift = parseInt(document.getElementById('shift').value);
 
-        const hexArray = hexinput.split(/\s+/).filter(h => h.length > 0);
-        const decoded = hexArray.map(h => {
-          const num = parseInt(h, 16);
-          if (isNaN(num)) throw new Error('Invalid hex');
-          const char = String.fromCharCode(num);
+        // Step 1: Hex decode
+        const fromHexText = fromHex(hexInput);
+
+        // Step 2: Reverse Caesar shift
+        const unshifted = caesarShift(fromHexText, -shift);
+
+        // Step 3: Reverse monoalphabetic substitution
+        const decoded = unshifted.split('').map(char => {
           const upper = char.toUpperCase();
-          
           if (upper >= 'A' && upper <= 'Z') {
             const index = key.indexOf(upper);
-            if (index === -1) throw new Error('Character not in key');
-            return alphabet[index];
+            if (index === -1) throw new Error('Character not found in key: ' + upper);
+            const original = alphabet[index];
+            return char === upper ? original : original.toLowerCase();
           }
           return char;
         }).join('');
@@ -479,67 +431,53 @@
       }
     }
 
-    // ===== HEX ENCODING =====
+    // ===== CAESAR + HEX =====
+    function encodeCaesarHex() {
+      const plaintext = document.getElementById('input-text').value;
+      if (!plaintext) { document.getElementById('output-text').value = ''; return; }
+      const shift = parseInt(document.getElementById('shift').value);
+      document.getElementById('output-text').value = toHex(caesarShift(plaintext, shift));
+    }
+
+    function decodeCaesarHex() {
+      const hexInput = document.getElementById('input-text').value.trim();
+      if (!hexInput) { document.getElementById('output-text').value = ''; return; }
+      try {
+        const shift = parseInt(document.getElementById('shift').value);
+        document.getElementById('output-text').value = caesarShift(fromHex(hexInput), -shift);
+      } catch (e) {
+        document.getElementById('output-text').value = 'Error: ' + e.message;
+      }
+    }
+
+    // ===== HEX ONLY =====
     function encodeHex() {
       const plaintext = document.getElementById('input-text').value;
-
-      if (!plaintext) {
-        document.getElementById('output-text').value = '';
-        return;
-      }
-
-      const encoded = plaintext.split('').map(char => {
-        return char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0');
-      }).join(' ');
-
-      document.getElementById('output-text').value = encoded;
+      if (!plaintext) { document.getElementById('output-text').value = ''; return; }
+      document.getElementById('output-text').value = toHex(plaintext);
     }
 
     function decodeHex() {
-      const hexinput = document.getElementById('input-text').value.trim();
-
-      if (!hexinput) {
-        document.getElementById('output-text').value = '';
-        return;
-      }
-
+      const hexInput = document.getElementById('input-text').value.trim();
+      if (!hexInput) { document.getElementById('output-text').value = ''; return; }
       try {
-        const hexArray = hexinput.split(/\s+/).filter(h => h.length > 0);
-        const decoded = hexArray.map(h => {
-          const num = parseInt(h, 16);
-          if (isNaN(num)) throw new Error('Invalid hex');
-          return String.fromCharCode(num);
-        }).join('');
-
-        document.getElementById('output-text').value = decoded;
+        document.getElementById('output-text').value = fromHex(hexInput);
       } catch (e) {
         document.getElementById('output-text').value = 'Error: ' + e.message;
       }
     }
 
-    // ===== UNIFIED ENCODE/DECODE =====
+    // ===== UNIFIED =====
     function performEncode() {
-      const cipherType = document.getElementById('cipher-type').value;
-      
-      if (cipherType === 'caesar') {
-        encodeCaesar();
-      } else if (cipherType === 'monoalphabetic') {
-        encodeMonoalphabetic();
-      } else if (cipherType === 'hex') {
-        encodeHex();
-      }
+      if (currentMode === 'caesar-hex') encodeCaesarHex();
+      else if (currentMode === 'hex') encodeHex();
+      else if (currentMode === 'mono-all') encodeMonoAll();
     }
 
     function performDecode() {
-      const cipherType = document.getElementById('cipher-type').value;
-      
-      if (cipherType === 'caesar') {
-        decodeCaesar();
-      } else if (cipherType === 'monoalphabetic') {
-        decodeMonoalphabetic();
-      } else if (cipherType === 'hex') {
-        decodeHex();
-      }
+      if (currentMode === 'caesar-hex') decodeCaesarHex();
+      else if (currentMode === 'hex') decodeHex();
+      else if (currentMode === 'mono-all') decodeMonoAll();
     }
   </script>
 
