@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Budget AntiSpy Website</title>
+  <title>Combined Cipher Translator</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -25,6 +25,12 @@
       color: #111;
     }
 
+    .container {
+      width: 100%;
+      max-width: 800px;
+    }
+
+    /* Cipher Selection */
     .cipher-selector {
       margin-bottom: 1.5rem;
       padding: 1rem;
@@ -32,7 +38,6 @@
       border: 1px solid #ddd;
       border-radius: 10px;
       width: 100%;
-      max-width: 700px;
     }
 
     .cipher-selector label {
@@ -52,11 +57,20 @@
       font-size: 14px;
     }
 
+    /* Caesar Cipher Controls */
     .shift-row {
-      display: flex;
+      display: none;
       align-items: center;
       gap: 12px;
       margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+    }
+
+    .shift-row.active {
+      display: flex;
     }
 
     .shift-row label {
@@ -74,6 +88,7 @@
       min-width: 30px;
     }
 
+    /* Monoalphabetic Key Controls */
     .monoalphabetic-key {
       display: none;
       margin-bottom: 1.5rem;
@@ -82,7 +97,6 @@
       border: 1px solid #ddd;
       border-radius: 10px;
       width: 100%;
-      max-width: 700px;
     }
 
     .monoalphabetic-key.active {
@@ -100,7 +114,7 @@
 
     .monoalphabetic-key textarea {
       width: 100%;
-      height: 80px;
+      height: 60px;
       border: none;
       outline: none;
       resize: none;
@@ -108,12 +122,14 @@
       font-size: 0.9rem;
       color: #111;
       background: transparent;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .key-buttons {
       display: flex;
       gap: 10px;
-      margin-top: 10px;
     }
 
     .key-buttons button {
@@ -133,14 +149,20 @@
       border-color: #666;
     }
 
+    /* Input/Output Panels */
+    .io-container {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      width: 100%;
+    }
+
     .panel {
+      flex: 1;
       background: #fff;
       border: 1px solid #ddd;
       border-radius: 10px;
       padding: 1rem;
-      width: 100%;
-      max-width: 700px;
-      margin-bottom: 1.5rem;
     }
 
     .panel label {
@@ -154,32 +176,31 @@
 
     .panel textarea {
       width: 100%;
-      height: 140px;
+      height: 160px;
       border: none;
       outline: none;
       resize: none;
       font-family: monospace;
-      font-size: 1.1rem;
+      font-size: 1rem;
       color: #111;
       background: transparent;
     }
 
-    .container {
-      width: 100%;
-      max-width: 700px;
+    .panel textarea:read-only {
+      color: #666;
     }
 
+    /* Action Buttons */
     .button-row {
       display: flex;
       gap: 10px;
       margin-bottom: 1.5rem;
       width: 100%;
-      max-width: 700px;
     }
 
-    button {
+    button.action-btn {
       flex: 1;
-      padding: 10px 16px;
+      padding: 12px 16px;
       border: 2px solid #333;
       background: #333;
       border-radius: 6px;
@@ -190,21 +211,49 @@
       transition: all 0.2s;
     }
 
-    button:hover {
+    button.action-btn:hover {
       background: #555;
       border-color: #555;
     }
 
-    .hidden {
-      display: none;
+    .swap-btn {
+      padding: 8px 12px;
+      border: 2px solid #666;
+      background: #f0f0f0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      color: #333;
+      transition: all 0.2s;
+    }
+
+    .swap-btn:hover {
+      background: #e0e0e0;
+    }
+
+    .button-row-with-swap {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .button-row-with-swap .action-btn {
+      flex: 1;
+    }
+
+    .button-row-with-swap .swap-btn {
+      flex: 0;
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h1>Budget AntiSpy Website</h1>
+    <h1>Combined Cipher Translator</h1>
 
+    <!-- Cipher Type Selection -->
     <div class="cipher-selector">
       <label for="cipher-type">Select Cipher</label>
       <select id="cipher-type" onchange="switchCipher()">
@@ -214,104 +263,41 @@
       </select>
     </div>
 
-    <!-- Caesar Cipher Section -->
-    <div id="caesar-section">
-      <div class="shift-row">
-        <label for="shift">Shift</label>
-        <input type="range" id="shift" min="-25" max="25" value="3" step="1"
-          oninput="document.getElementById('shift-out').textContent = this.value;" />
-        <span id="shift-out">3</span>
-      </div>
+    <!-- Caesar Shift Control -->
+    <div id="caesar-controls" class="shift-row active">
+      <label for="shift">Shift</label>
+      <input type="range" id="shift" min="-25" max="25" value="3" step="1"
+        oninput="document.getElementById('shift-out').textContent = this.value;" />
+      <span id="shift-out">3</span>
+    </div>
 
-      <div class="button-row">
-        <button onclick="encodeWithCurrentMethod()">Encode</button>
-        <button onclick="decodeWithCurrentMethod()">Decode</button>
-      </div>
-
-      <div class="panel">
-        <label for="plaintext">Plaintext Input</label>
-        <textarea id="plaintext" placeholder="Type text here to encode..."></textarea>
-      </div>
-
-      <div class="panel">
-        <label for="encoded">Encoded</label>
-        <textarea id="encoded" readonly placeholder="Encoded Super Secure Text will appear here..."></textarea>
-      </div>
-
-      <div class="panel">
-        <label for="hexinput">Input (to decode)</label>
-        <textarea id="hexinput" placeholder="Paste Super Secure Text here to decode back to plaintext..."></textarea>
-      </div>
-
-      <div class="panel">
-        <label for="decoded">Decoded Plaintext</label>
-        <textarea id="decoded" readonly placeholder="Decoded output will appear here..."></textarea>
+    <!-- Monoalphabetic Key Control -->
+    <div id="monoalphabetic-controls" class="monoalphabetic-key">
+      <label for="mono-key">Substitution Key (A-Z)</label>
+      <textarea id="mono-key" placeholder="Enter 26 unique letters (A-Z). Default: BCDEFGHIJKLMNOPQRSTUVWXYZAA"></textarea>
+      <div class="key-buttons">
+        <button onclick="generateRandomMonoKey()">Generate Random Key</button>
+        <button onclick="resetMonoKey()">Reset to Default</button>
       </div>
     </div>
 
-    <!-- Monoalphabetic Cipher Section -->
-    <div id="monoalphabetic-section" class="hidden">
-      <div class="monoalphabetic-key active">
-        <label for="mono-key">Substitution Key (A-Z)</label>
-        <textarea id="mono-key" placeholder="Enter 26 unique letters (A-Z) as your substitution key. Default: BCDEFGHIJKLMNOPQRSTUVWXYZAA"></textarea>
-        <div class="key-buttons">
-          <button onclick="generateRandomMonoKey()">Generate Random Key</button>
-          <button onclick="resetMonoKey()">Reset to Default</button>
-        </div>
-      </div>
-
-      <div class="button-row">
-        <button onclick="encodeWithCurrentMethod()">Encode</button>
-        <button onclick="decodeWithCurrentMethod()">Decode</button>
-      </div>
-
+    <!-- Input/Output Panels -->
+    <div class="io-container">
       <div class="panel">
-        <label for="mono-plaintext">Plaintext Input</label>
-        <textarea id="mono-plaintext" placeholder="Type text here to encode..."></textarea>
+        <label for="input-text">Input</label>
+        <textarea id="input-text" placeholder="Enter text to encode or decode..."></textarea>
       </div>
-
       <div class="panel">
-        <label for="mono-encoded">Encoded</label>
-        <textarea id="mono-encoded" readonly placeholder="Encoded text will appear here..."></textarea>
-      </div>
-
-      <div class="panel">
-        <label for="mono-hexinput">Input (to decode)</label>
-        <textarea id="mono-hexinput" placeholder="Paste encoded text here to decode..."></textarea>
-      </div>
-
-      <div class="panel">
-        <label for="mono-decoded">Decoded Plaintext</label>
-        <textarea id="mono-decoded" readonly placeholder="Decoded output will appear here..."></textarea>
+        <label for="output-text">Output</label>
+        <textarea id="output-text" readonly placeholder="Result will appear here..."></textarea>
       </div>
     </div>
 
-    <!-- Hex Encoding Section -->
-    <div id="hex-section" class="hidden">
-      <div class="button-row">
-        <button onclick="encodeWithCurrentMethod()">Encode</button>
-        <button onclick="decodeWithCurrentMethod()">Decode</button>
-      </div>
-
-      <div class="panel">
-        <label for="hex-plaintext">Plaintext Input</label>
-        <textarea id="hex-plaintext" placeholder="Type text here to encode..."></textarea>
-      </div>
-
-      <div class="panel">
-        <label for="hex-encoded">Encoded (Hex)</label>
-        <textarea id="hex-encoded" readonly placeholder="Hex encoded text will appear here..."></textarea>
-      </div>
-
-      <div class="panel">
-        <label for="hex-hexinput">Input (to decode)</label>
-        <textarea id="hex-hexinput" placeholder="Paste hex encoded text here to decode..."></textarea>
-      </div>
-
-      <div class="panel">
-        <label for="hex-decoded">Decoded Plaintext</label>
-        <textarea id="hex-decoded" readonly placeholder="Decoded output will appear here..."></textarea>
-      </div>
+    <!-- Action Buttons -->
+    <div class="button-row-with-swap">
+      <button class="action-btn" onclick="performEncode()">Encode</button>
+      <button class="action-btn" onclick="performDecode()">Decode</button>
+      <button class="swap-btn" onclick="swapInputOutput()">⇅ Swap</button>
     </div>
   </div>
 
@@ -320,11 +306,88 @@
 
     function switchCipher() {
       const cipherType = document.getElementById('cipher-type').value;
-      document.getElementById('caesar-section').classList.toggle('hidden', cipherType !== 'caesar');
-      document.getElementById('monoalphabetic-section').classList.toggle('hidden', cipherType !== 'monoalphabetic');
-      document.getElementById('hex-section').classList.toggle('hidden', cipherType !== 'hex');
+      
+      // Toggle Caesar controls
+      const caesarControls = document.getElementById('caesar-controls');
+      caesarControls.classList.toggle('active', cipherType === 'caesar');
+
+      // Toggle Monoalphabetic controls
+      const monoControls = document.getElementById('monoalphabetic-controls');
+      monoControls.classList.toggle('active', cipherType === 'monoalphabetic');
+
+      // Clear output when switching
+      document.getElementById('output-text').value = '';
     }
 
+    function swapInputOutput() {
+      const input = document.getElementById('input-text');
+      const output = document.getElementById('output-text');
+      const temp = input.value;
+      input.value = output.value;
+      output.value = temp;
+    }
+
+    // ===== CAESAR CIPHER =====
+    function encodeCaesar() {
+      const plaintext = document.getElementById('input-text').value;
+      const shift = parseInt(document.getElementById('shift').value);
+
+      if (!plaintext) {
+        document.getElementById('output-text').value = '';
+        return;
+      }
+
+      const caesarEncoded = plaintext.split('').map(char => {
+        if (char >= 'A' && char <= 'Z') {
+          return String.fromCharCode(((char.charCodeAt(0) - 65 + shift) % 26 + 26) % 26 + 65);
+        }
+        if (char >= 'a' && char <= 'z') {
+          return String.fromCharCode(((char.charCodeAt(0) - 97 + shift) % 26 + 26) % 26 + 97);
+        }
+        return char;
+      }).join('');
+
+      const encoded = caesarEncoded.split('').map(char => {
+        return char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0');
+      }).join(' ');
+
+      document.getElementById('output-text').value = encoded;
+    }
+
+    function decodeCaesar() {
+      const hexinput = document.getElementById('input-text').value.trim();
+      const shift = parseInt(document.getElementById('shift').value);
+
+      if (!hexinput) {
+        document.getElementById('output-text').value = '';
+        return;
+      }
+
+      try {
+        const hexArray = hexinput.split(/\s+/).filter(h => h.length > 0);
+        const hexToText = hexArray.map(h => {
+          const num = parseInt(h, 16);
+          if (isNaN(num)) throw new Error('Invalid hex');
+          return String.fromCharCode(num);
+        }).join('');
+
+        const decoded = hexToText.split('').map(char => {
+          if (char >= 'A' && char <= 'Z') {
+            return String.fromCharCode(((char.charCodeAt(0) - 65 - shift) % 26 + 26) % 26 + 65);
+          }
+          if (char >= 'a' && char <= 'z') {
+            return String.fromCharCode(((char.charCodeAt(0) - 97 - shift) % 26 + 26) % 26 + 97);
+          }
+          return char;
+        }).join('');
+
+        document.getElementById('output-text').value = decoded;
+      } catch (e) {
+        document.getElementById('output-text').value = 'Error: ' + e.message;
+      }
+    }
+
+    // ===== MONOALPHABETIC CIPHER =====
     function generateRandomMonoKey() {
       const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
       for (let i = alphabet.length - 1; i > 0; i--) {
@@ -355,9 +418,9 @@
     }
 
     function encodeMonoalphabetic() {
-      const plaintext = document.getElementById('mono-plaintext').value;
+      const plaintext = document.getElementById('input-text').value;
       if (!plaintext) {
-        document.getElementById('mono-encoded').value = '';
+        document.getElementById('output-text').value = '';
         return;
       }
 
@@ -374,21 +437,20 @@
           return char;
         }).join('');
 
-        // Convert to hex with spaces
         const hexEncoded = encoded.split('').map(char => {
           return char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0');
         }).join(' ');
 
-        document.getElementById('mono-encoded').value = hexEncoded;
+        document.getElementById('output-text').value = hexEncoded;
       } catch (e) {
-        document.getElementById('mono-encoded').value = 'Error: ' + e.message;
+        document.getElementById('output-text').value = 'Error: ' + e.message;
       }
     }
 
     function decodeMonoalphabetic() {
-      const hexinput = document.getElementById('mono-hexinput').value.trim();
+      const hexinput = document.getElementById('input-text').value.trim();
       if (!hexinput) {
-        document.getElementById('mono-decoded').value = '';
+        document.getElementById('output-text').value = '';
         return;
       }
 
@@ -396,7 +458,6 @@
         const key = getMonoalphabeticKey();
         const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-        // Convert hex to text
         const hexArray = hexinput.split(/\s+/).filter(h => h.length > 0);
         const decoded = hexArray.map(h => {
           const num = parseInt(h, 16);
@@ -412,104 +473,18 @@
           return char;
         }).join('');
 
-        document.getElementById('mono-decoded').value = decoded;
+        document.getElementById('output-text').value = decoded;
       } catch (e) {
-        document.getElementById('mono-decoded').value = 'Error: ' + e.message;
+        document.getElementById('output-text').value = 'Error: ' + e.message;
       }
     }
 
-    function encodeWithCurrentMethod() {
-      const cipherType = document.getElementById('cipher-type').value;
-      
-      if (cipherType === 'caesar') {
-        encodeCaesar();
-      } else if (cipherType === 'monoalphabetic') {
-        encodeMonoalphabetic();
-      } else if (cipherType === 'hex') {
-        encodeHex();
-      }
-    }
-
-    function decodeWithCurrentMethod() {
-      const cipherType = document.getElementById('cipher-type').value;
-      
-      if (cipherType === 'caesar') {
-        decodeCaesar();
-      } else if (cipherType === 'monoalphabetic') {
-        decodeMonoalphabetic();
-      } else if (cipherType === 'hex') {
-        decodeHex();
-      }
-    }
-
-    function encodeCaesar() {
-      const plaintext = document.getElementById('plaintext').value;
-      const shift = parseInt(document.getElementById('shift').value);
-
-      if (!plaintext) {
-        document.getElementById('encoded').value = '';
-        return;
-      }
-
-      // Step 1: Apply cipher
-      const caesarEncoded = plaintext.split('').map(char => {
-        if (char >= 'A' && char <= 'Z') {
-          return String.fromCharCode(((char.charCodeAt(0) - 65 + shift) % 26 + 26) % 26 + 65);
-        }
-        if (char >= 'a' && char <= 'z') {
-          return String.fromCharCode(((char.charCodeAt(0) - 97 + shift) % 26 + 26) % 26 + 97);
-        }
-        return char;
-      }).join('');
-
-      // Step 2: Convert to Super Secure Text (SST)
-      const encoded = caesarEncoded.split('').map(char => {
-        return char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0');
-      }).join(' ');
-
-      document.getElementById('encoded').value = encoded;
-    }
-
-    function decodeCaesar() {
-      const hexinput = document.getElementById('hexinput').value.trim();
-      const shift = parseInt(document.getElementById('shift').value);
-
-      if (!hexinput) {
-        document.getElementById('decoded').value = '';
-        return;
-      }
-
-      try {
-        // Step 1: Convert hex to text
-        const hexArray = hexinput.split(/\s+/).filter(h => h.length > 0);
-        const hexToText = hexArray.map(h => {
-          const num = parseInt(h, 16);
-          if (isNaN(num)) throw new Error('Invalid hex');
-          return String.fromCharCode(num);
-        }).join('');
-
-        // Step 2: Reverse Caesar shift
-        const decoded = hexToText.split('').map(char => {
-          if (char >= 'A' && char <= 'Z') {
-            return String.fromCharCode(((char.charCodeAt(0) - 65 - shift) % 26 + 26) % 26 + 65);
-          }
-          if (char >= 'a' && char <= 'z') {
-            return String.fromCharCode(((char.charCodeAt(0) - 97 - shift) % 26 + 26) % 26 + 97);
-          }
-          return char;
-        }).join('');
-
-        document.getElementById('decoded').value = decoded;
-      } catch (e) {
-        document.getElementById('decoded').value = 'Invalid hex input: ' + e.message;
-      }
-    }
-
+    // ===== HEX ENCODING =====
     function encodeHex() {
-      const plaintext = document.getElementById('hex-plaintext').value;
+      const plaintext = document.getElementById('input-text').value;
 
       if (!plaintext) {
-        document.getElementById('hex-encoded').value = '';
+        document.getElementById('output-text').value = '';
         return;
       }
 
@@ -517,14 +492,14 @@
         return char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0');
       }).join(' ');
 
-      document.getElementById('hex-encoded').value = encoded;
+      document.getElementById('output-text').value = encoded;
     }
 
     function decodeHex() {
-      const hexinput = document.getElementById('hex-hexinput').value.trim();
+      const hexinput = document.getElementById('input-text').value.trim();
 
       if (!hexinput) {
-        document.getElementById('hex-decoded').value = '';
+        document.getElementById('output-text').value = '';
         return;
       }
 
@@ -536,9 +511,34 @@
           return String.fromCharCode(num);
         }).join('');
 
-        document.getElementById('hex-decoded').value = decoded;
+        document.getElementById('output-text').value = decoded;
       } catch (e) {
-        document.getElementById('hex-decoded').value = 'Invalid hex input: ' + e.message;
+        document.getElementById('output-text').value = 'Error: ' + e.message;
+      }
+    }
+
+    // ===== UNIFIED ENCODE/DECODE =====
+    function performEncode() {
+      const cipherType = document.getElementById('cipher-type').value;
+      
+      if (cipherType === 'caesar') {
+        encodeCaesar();
+      } else if (cipherType === 'monoalphabetic') {
+        encodeMonoalphabetic();
+      } else if (cipherType === 'hex') {
+        encodeHex();
+      }
+    }
+
+    function performDecode() {
+      const cipherType = document.getElementById('cipher-type').value;
+      
+      if (cipherType === 'caesar') {
+        decodeCaesar();
+      } else if (cipherType === 'monoalphabetic') {
+        decodeMonoalphabetic();
+      } else if (cipherType === 'hex') {
+        decodeHex();
       }
     }
   </script>
