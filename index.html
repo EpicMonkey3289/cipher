@@ -228,6 +228,18 @@
       transition: all 0.2s;
     }
 
+    button.copy-btn {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid #333;
+      background: gray;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: black;
+      transition: all 0.2s;
+    }
     button.action-btn:hover {
       background: #555;
       border-color: #555;
@@ -284,6 +296,7 @@
     <div class="button-row">
       <button class="action-btn" onclick="performEncode()">Encode</button>
       <button class="action-btn" onclick="performDecode()">Decode</button>
+      <button class="copy-btn" onclick="copyClipboard()">Copy Output</button>
     </div>
   </div>
 
@@ -339,6 +352,16 @@
       if (key.length !== 26) throw new Error('Substitution key must be exactly 26 characters');
       if (new Set(key).size !== 26) throw new Error('Substitution key must contain 26 unique letters');
       return key;
+    }
+
+    // Copy Output Code (100% Archie Made)
+    function copyClipboard() {
+      var copyText = document.getElementById('output-text');
+
+      copyText.select();
+      copyText.setSelectionRange(0, 99999);
+
+      navigator.clipboard.writeText(copyText.value);
     }
 
     // ===== CAESAR HELPERS =====
